@@ -25,8 +25,15 @@ jobs:
     - name: Get changed SQL scripts
       id: changed_scripts
       run: |
-        # Get a list of changed SQL files in the current commit
-        git diff --name-only HEAD^ HEAD ./sql-scripts/*.sql > changed_scripts.txt
+        # Check if there is more than one commit
+        if git rev-parse HEAD^ > /dev/null 2>&1; then
+          # If there is more than one commit, check for changes in the sql-scripts folder
+          git diff --name-only HEAD^ HEAD ./sql-scripts/*.sql > changed_scripts.txt
+        else
+          # If it's the first commit, assume all scripts need to be run
+          find ./sql-scripts/*.sql > changed_scripts.txt
+        fi
+        # Output the list of changed scripts
         cat changed_scripts.txt
         
 
