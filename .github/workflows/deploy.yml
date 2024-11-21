@@ -17,7 +17,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y postgresql-client
-        echo "${{ secrets.PGHOST }}""
+        echo "${{ secrets.PGHOST }}"
 
     # - name: Deploy SQL Script
     #   env:
