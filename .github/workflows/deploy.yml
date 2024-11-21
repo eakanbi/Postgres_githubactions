@@ -18,16 +18,16 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y postgresql-client
 
-    - name: Deploy SQL Script
-      env:
-        PGHOST: ${{ secrets.PGHOST }}
-        PGUSER: ${{ secrets.PGUSER }}
-        PGPASSWORD: ${{ secrets.PGPASSWORD }}
-        PGDATABASE: ${{ secrets.PGDATABASE }}
-      run: |
-        set -e
-        echo "Starting SQL deployment..."
-        psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f ./path/to/your/script.sql
+    # - name: Deploy SQL Script
+    #   env:
+    #     PGHOST: ${{ secrets.PGHOST }}
+    #     PGUSER: ${{ secrets.PGUSER }}
+    #     PGPASSWORD: ${{ secrets.PGPASSWORD }}
+    #     PGDATABASE: ${{ secrets.PGDATABASE }}
+    #   run: |
+    #     set -e
+    #     echo "Starting SQL deployment..."
+    #     psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f ./path/to/your/script.sql
 
     - name: Verify Deployment
       env:
