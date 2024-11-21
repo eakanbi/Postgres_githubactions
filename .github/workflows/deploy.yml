@@ -22,19 +22,19 @@ jobs:
         brew install libpq
         brew link --force libpq
 
-    - name: Get changed SQL scripts
-      id: changed_scripts
-      run: |
-        # Check if there is more than one commit
-        if git rev-parse HEAD^ > /dev/null 2>&1; then
-          # If there is more than one commit, check for changes in the sql-scripts folder
-          git diff --name-only HEAD^ HEAD ./sql-scripts/*.sql > changed_scripts.txt
-        else
-          # If it's the first commit, assume all scripts need to be run
-          find ./sql-scripts/*.sql > changed_scripts.txt
-        fi
-        # Output the list of changed scripts
-        cat changed_scripts.txt
+    # - name: Get changed SQL scripts
+    #   id: changed_scripts
+    #   run: |
+    #     # Check if there is more than one commit
+    #     if git rev-parse HEAD^ > /dev/null 2>&1; then
+    #       # If there is more than one commit, check for changes in the sql-scripts folder
+    #       git diff --name-only HEAD^ HEAD ./sql-scripts/*.sql > changed_scripts.txt
+    #     else
+    #       # If it's the first commit, assume all scripts need to be run
+    #       find ./sql-scripts/*.sql > changed_scripts.txt
+    #     fi
+    #     # Output the list of changed scripts
+    #     cat changed_scripts.txt
         
 
     - name: Deploy SQL Script
@@ -44,24 +44,23 @@ jobs:
         PGPASSWORD: ${{ secrets.PGPASSWORD }}
         PGDATABASE: ${{ secrets.PGDATABASE }}
       run: |
-        # Read the list of changed scripts and run them
-        if [ -s changed_scripts.txt ]; then
-          for script in $(cat changed_scripts.txt); do
-            echo "Running $script..."
-            psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f "$script"
-            # Check if the script was successfully executed
-            if [ $? -eq 0 ]; then
-              # Move the script to the 'processed' folder after successful execution
-              # mkdir -p ./sql-scripts/processed
-              mv "$script" ./sql-scripts/processed/
-              echo "Moved $script to processed folder."
-            else
-              echo "Error executing $script. Skipping it."
-            fi
-          done
+        for script in ./sql-scripts/*.sql; do
+        # Run the SQL script
+        psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f "$script"
+    
+        # Check if the script was executed successfully
+        if [ $? -eq 0 ]; then
+        echo "script $script ran successfully"
+        
+        # Make sure the 'processed' folder exists, then move the script to the 'processed' folder
+        mkdir -p ./sql-scripts/processed
+        mv "$script" ./sql-scripts/processed/
+        
+        echo "Moved $script to processed folder."
         else
-          echo "No SQL script changes detected."
+        echo "Error executing $script. Skipping it."
         fi
+        done
 
     - name: Verify Deployment
       env:
