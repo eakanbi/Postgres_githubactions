@@ -61,6 +61,7 @@ jobs:
           done
         else
           echo "No SQL script changes detected."
+        fi
 
     - name: Verify Deployment
       env:
