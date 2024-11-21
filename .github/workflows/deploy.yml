@@ -45,6 +45,12 @@ jobs:
         PGDATABASE: ${{ secrets.PGDATABASE }}
       run: |
         for script in ./sql-scripts/*.sql; do
+        # Check if the script has already been moved to the 'processed' folder
+        if [[ -f "./sql-scripts/processed/$(basename $script)" ]]; then
+        echo "Skipping $script, already processed."
+        continue
+        fi
+
         # Run the SQL script
         psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f "$script"
     
