@@ -21,6 +21,13 @@ jobs:
         brew update
         brew install libpq
         brew link --force libpq
+
+    - name: Get changed SQL scripts
+      id: changed_scripts
+      run: |
+        # Get a list of changed SQL files in the current commit
+        git diff --name-only HEAD^ HEAD ./sql-scripts/*.sql > changed_scripts.txt
+        cat changed_scripts.txt
         
 
     - name: Deploy SQL Script
@@ -30,11 +37,15 @@ jobs:
         PGPASSWORD: ${{ secrets.PGPASSWORD }}
         PGDATABASE: ${{ secrets.PGDATABASE }}
       run: |
-        set -e
-        echo "Starting SQL deployment..."
-        for script in ./sql-scripts/*.sql; do
-        psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f "$script"
-        done
+        # Read the list of changed scripts and run them
+        if [ -s changed_scripts.txt ]; then
+          for script in $(cat changed_scripts.txt); do
+            echo "Running $script..."
+            psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f "$script"
+          done
+        else
+          echo "No SQL script changes detected."
+        fi
 
     - name: Verify Deployment
       env:
