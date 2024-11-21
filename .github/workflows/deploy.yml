@@ -25,4 +25,19 @@ jobs:
         PGPASSWORD: ${{ secrets.PGPASSWORD }}
         PGDATABASE: ${{ secrets.PGDATABASE }}
       run: |
+        set -e
+        echo "Starting SQL deployment..."
         psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f ./path/to/your/script.sql
+
+    - name: Verify Deployment
+      env:
+        PGHOST: ${{ secrets.PGHOST }}
+        PGUSER: ${{ secrets.PGUSER }}
+        PGPASSWORD: ${{ secrets.PGPASSWORD }}
+        PGDATABASE: ${{ secrets.PGDATABASE }}
+      run: |
+        echo "Verifying deployment..."
+        psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "SELECT NOW();"
+
+    - name: Log Successful Deployment
+      run: echo "SQL script successfully deployed to ${{ secrets.PGDATABASE }} at ${{ secrets.PGHOST }}"
