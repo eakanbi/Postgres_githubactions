@@ -44,28 +44,20 @@ jobs:
         PGPASSWORD: ${{ secrets.PGPASSWORD }}
         PGDATABASE: ${{ secrets.PGDATABASE }}
       run: |
+        # Loop through the scripts
         for script in ./sql-scripts/*.sql; do
-        # Check if the script has already been moved to the 'processed' folder
-        if [[ -f "./sql-scripts/processed/$(basename $script)" ]]; then
-        echo "Skipping $script, already processed."
-        continue
-        fi
-
-        # Run the SQL script
-        psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f "$script"
-    
-        # Check if the script was executed successfully
-        if [ $? -eq 0 ]; then
-        echo "script $script ran successfully"
-        
-        # Make sure the 'processed' folder exists, then move the script to the 'processed' folder
-        mkdir -p ./processed
-        mv "$script" ./processed/
-        
-        echo "Moved $script to processed folder."
-        else
-        echo "Error executing $script. Skipping it."
-        fi
+          script_name=$(basename "$script")
+          # Check if the script has already been executed
+          script_executed=$(psql -h $PGHOST -U $PGUSER -d $PGDATABASE -t -c "SELECT 1 FROM executed_scripts WHERE script_name = '$script_name'")
+          
+          if [[ -z "$script_executed" ]]; then
+            echo "Running $script_name..."
+            psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f "$script"
+            # Log the executed script in the table
+            psql -h $PGHOST -U $PGUSER -d $PGDATABASE -c "INSERT INTO executed_scripts (script_name) VALUES ('$script_name');"
+          else
+            echo "$script_name already executed, skipping..."
+          fi
         done
 
     - name: Verify Deployment
