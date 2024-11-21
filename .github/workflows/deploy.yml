@@ -49,10 +49,18 @@ jobs:
           for script in $(cat changed_scripts.txt); do
             echo "Running $script..."
             psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f "$script"
+            # Check if the script was successfully executed
+            if [ $? -eq 0 ]; then
+              # Move the script to the 'processed' folder after successful execution
+              # mkdir -p ./sql-scripts/processed
+              mv "$script" ./sql-scripts/processed/
+              echo "Moved $script to processed folder."
+            else
+              echo "Error executing $script. Skipping it."
+            fi
           done
         else
           echo "No SQL script changes detected."
-        fi
 
     - name: Verify Deployment
       env:
