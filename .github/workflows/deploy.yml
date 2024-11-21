@@ -59,8 +59,8 @@ jobs:
         echo "script $script ran successfully"
         
         # Make sure the 'processed' folder exists, then move the script to the 'processed' folder
-        mkdir -p ./sql-scripts/processed
-        mv "$script" ./sql-scripts/processed/
+        mkdir -p ./processed
+        mv "$script" ./processed/
         
         echo "Moved $script to processed folder."
         else
